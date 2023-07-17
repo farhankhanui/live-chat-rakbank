@@ -11,7 +11,7 @@ import {
   StyledErrorWrapper
 } from "./styled";
 
-import SendMessage  from "../../../assets/sendMessage.svg";
+// import SendMessage  from "../../../assets/sendMessage.svg";
 
 const MIN_ROWS = 1;
 const MAX_ROWS = 5;
@@ -84,7 +84,7 @@ function SendMessageInputScreen({ placeholder, chatInstance, application }) {
           onKeyDown={handleKeyDown}
         />
         <StyledButton type="submit">
-          <SendMessage />
+          {/* <SendMessage /> */}
         </StyledButton>
       </TextareaWrapper>
       {error && (

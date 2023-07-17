@@ -19,16 +19,15 @@ const Container = styled.div`
   display: flex;
   flex-direction: column;
   width: 375px;
-  min-height: ${(props) => (props.isHeader ? "450px" : "400px")};
-  border-radius: 8px;
+  min-height:  ${(props) => props.isHeader ? '450px' : '400px'};
+  border-radius: 8px;  
   ${(props) =>
-    props.application !== "Internet Banking" &&
-    `
+    props.application !== 'Internet Banking' && `
   background-color: #fff;
 `}
-  ${(props) =>
+${(props) =>
     props.isHeader && {
-      boxShadow: "0 2px 54px 0 rgba(0, 0, 0, 0.11)",
+      boxShadow: '0 2px 54px 0 rgba(0, 0, 0, 0.11)',
     }}
 `;
 
@@ -49,23 +48,23 @@ const LoadingLabel = styled.div`
 // const chatInstance = GenesysChat.getInstance();
 
 function Chat({
-  initiatedCustomerName = "",
-  initiatedCustomerMobile = "",
-  emailAddress = "",
+  initiatedCustomerName = '',
+  initiatedCustomerMobile = '',
+  emailAddress = '',
   message,
-  isAuth,
+ 
   onClose = () => {},
   onMinimize = () => {},
   onNewMessageReceive = () => {},
   subject,
   config,
   Header,
-  application = "",
+  application = '',
   SessionComponent,
   FailureComponent,
   setIsChatFailed,
-  cifId,
-  triggerCloseChat = "",
+ 
+  triggerCloseChat = '',
   ConfirmModal,
   chatInitiated,
   sessionID,
@@ -80,9 +79,14 @@ function Chat({
   const [isSessionInvalid, setSessionInvalid] = useState(false);
 
   useEffect(() => {
-    // console.log(GenesysChat.getInstance());
-    setChatInstance(GenesysChat.getInstance());
-  }, []);
+    // console.log("GenesysChat",GenesysChat)
+  
+      setChatInstance(GenesysChat.getInstance());
+      
+      
+    
+    // console.log("GenesysChat.getInstance()",GenesysChat.getInstance())
+  }, [chatInstance])
 
   const agentTypingHandler = useCallback(
     (flag) => {
@@ -106,114 +110,96 @@ function Chat({
     [setMessages, onNewMessageReceive]
   );
 
-  const chatConnected = useCallback(() => {
+  const chatConnected = useCallback( () => {
+   // console.log("chatConnected",chatInstance)
     if (chatInstance !== null) {
       setIsLoading(false);
-      application === "Internet Banking" && chatInitiated();
+      application === 'Internet Banking' && chatInitiated();
       chatInstance.messagesCallback = handleNewMessageArrival;
       chatInstance.setOnTypingEventsHandler(agentTypingHandler);
       chatInstance.setOnAgentLeftEventHandler(agentLeftHandler);
       chatInstance.sendChatMessage(message);
     }
-  }, [
-    chatInstance,
-    message,
-    agentTypingHandler,
-    agentLeftHandler,
-    handleNewMessageArrival,
-  ]);
+  }, [chatInstance, message, agentTypingHandler, agentLeftHandler, handleNewMessageArrival])
 
-  const showFailureComponent = useCallback(
-    (failureReason) => {
-      if (application === "Internet Banking") {
-        failureReason === INVALID_SESSION && setSessionInvalid(true);
-        setIsFailure(true);
-        setIsLoading(false);
-        setIsChatFailed(true);
-      }
-    },
-    [setSessionInvalid, setIsFailure, setIsLoading, setIsChatFailed]
-  );
+  const showFailureComponent = useCallback((failureReason) => {
+    if (application === 'Internet Banking') {
+      failureReason === INVALID_SESSION && setSessionInvalid(true);
+      setIsFailure(true);
+      setIsLoading(false);
+      setIsChatFailed(true);
+    }
+  }, [setSessionInvalid, setIsFailure, setIsLoading, setIsChatFailed]);
 
   useEffect(() => {
-    if (chatInstance !== null) {
-      debugger;
+     
+    
+    if(chatInstance !== null){
+       
+     
       chatInstance.configureChat(config, application);
       setMessages([]);
-      chatInstance.initChat(
-        {
-          InitiatedCustomerName: initiatedCustomerName,
-          InitiatedCustomerMobile: initiatedCustomerMobile,
-          EmailAddress: emailAddress,
-          isAuth,
-          selectedSubject: subject,
-          message,
-          CIF: cifId ? cifId : null,
-          sessionID,
-        },
-        chatConnected,
-        showFailureComponent
-      );
+      chatInstance
+        .initChat(
+          {
+            InitiatedCustomerName: initiatedCustomerName,
+            InitiatedCustomerMobile: initiatedCustomerMobile,
+            EmailAddress: emailAddress,
+           
+            selectedSubject: "subject",
+            message:"lorem ispum",
+           
+            sessionID:'rfvu4hqhb8yw27y85gbkg0wggial'
+          },
+          chatConnected,
+          showFailureComponent
+        )
+        //setIsLoading(false);
     }
   }, [chatInstance]);
 
-  const handleClose = useCallback(
-    (closeEvent) => {
-      if (
-        application === "Internet Banking" &&
-        closeEvent !== "autoClose" &&
-        !isFailure
-      ) {
-        setShowModal(true);
-      } else {
-        setShowModal(false);
-        GenesysChat.getInstance().triggerDisconnectEvent();
-        onClose();
-      }
-    },
-    [onClose, isFailure]
-  );
+  const handleClose = useCallback((closeEvent) => {
+    if (application === 'Internet Banking' && closeEvent !== 'autoClose' && !isFailure) {
+      setShowModal(true);
+    } else {
+      setShowModal(false);
+      GenesysChat.getInstance().triggerDisconnectEvent();
+      onClose();  
+    }
+  }, [onClose, isFailure]);
 
   useEffect(() => {
-    if (triggerCloseChat !== "") {
+    if(triggerCloseChat !== '') {
       handleClose(triggerCloseChat);
     }
-  }, [triggerCloseChat]);
+  }, [triggerCloseChat])
 
   return (
     <Container isHeader={!!Header} application={application}>
-      {!!Header && (
-        <Header onClose={() => handleClose("close")} onMinimize={onMinimize} />
-      )}
+      {!!Header && <Header onClose={() => handleClose('close')} onMinimize={onMinimize} />}
       {isLoading ? (
         <LoadingLabel>Loading...</LoadingLabel>
-      ) : isFailure ? (
-        <FailureComponent invalidSession={isSessionInvalid} />
+        ) : isFailure ? (
+          <FailureComponent invalidSession={isSessionInvalid} />
       ) : (
         <Body>
           <MessagesList data={messages} />
           {console.log(messages)}
-          {agentTyping && !agentLeft && (
-            <TypingLabel>Agent is typing...</TypingLabel>
-          )}
+          {agentTyping && !agentLeft && <TypingLabel>Agent is typing...</TypingLabel>}
           {agentLeft && <TypingLabel>Agent left chat</TypingLabel>}
-          {!agentLeft && (
-            <SendMessageInput
-              placeholder="Type Message"
-              chatInstance={GenesysChat}
-              application={application}
-            />
-          )}
+          {!agentLeft && <SendMessageInput
+            placeholder="Type Message"
+            chatInstance={GenesysChat}
+            application={application}
+          />}
+          
         </Body>
       )}
-      {application === "Internet Banking" && SessionComponent && (
+      {application === 'Internet Banking' && SessionComponent && (
         <SessionComponent closeChat={(closeEvent) => handleClose(closeEvent)} />
       )}
-      {application === "Internet Banking" && showModal && (
-        <ConfirmModal
-          closeChat={(closeEvent) => handleClose(closeEvent)}
-          setShowModal={(showModal) => setShowModal(showModal)}
-        />
+       {application === 'Internet Banking' && showModal && (
+        <ConfirmModal closeChat={(closeEvent) => handleClose(closeEvent)} setShowModal={(showModal) => setShowModal(showModal)} />
       )}
     </Container>
   );
@@ -223,7 +209,7 @@ Chat.propTypes = {
   initiatedCustomerName: PropTypes.string,
   initiatedCustomerMobile: PropTypes.string,
   emailAddress: PropTypes.string,
-  isAuth: PropTypes.bool,
+ 
   onClose: PropTypes.func,
   onMinimize: PropTypes.func,
   config: PropTypes.shape({
@@ -234,7 +220,7 @@ Chat.propTypes = {
   }).isRequired,
   application: PropTypes.string,
   SessionComponent: PropTypes.elementType,
-  cifId: PropTypes.string,
+ 
   FailureComponent: PropTypes.elementType,
   setIsChatFailed: PropTypes.func,
   triggerCloseChat: PropTypes.string,

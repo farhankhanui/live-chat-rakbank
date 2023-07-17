@@ -2,7 +2,7 @@ import React from "react";
 import styled from "styled-components";
 import PropTypes from "prop-types";
 
-import User from "../../assets/user.svg";
+// import User from "../../assets/user.svg";
 
 const Container = styled.div`
   display: flex;
@@ -68,7 +68,7 @@ const Message = ({ body, date, incoming, name, style }) => (
       <DateStyled>{date}</DateStyled>
     </MessageWrapper>
     <Avatar incoming={incoming}>
-      {incoming ? <User /> : name ? name.charAt(0) : ""}
+      {incoming ? <></> : name ? name.charAt(0) : ""}
     </Avatar>
   </Container>
 );

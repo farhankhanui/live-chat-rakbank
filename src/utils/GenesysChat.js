@@ -3,13 +3,7 @@ import cometd from "cometd";
 import nanoid from "nanoid";
 import has from "lodash/has";
 
-import {
-  arg1,
-  arg2,
-  CONNECTED_STATUS,
-  data1,
-  INVALID_SESSION,
-} from "../constants";
+import { arg1, arg2, CONNECTED_STATUS, data1, INVALID_SESSION, } from "../constants";
 
 const ChatOperationTypes = Object.freeze({
   RequestChat: "requestChat",
@@ -24,23 +18,25 @@ const ChatOperationTypes = Object.freeze({
   TypingStarted: "TypingStarted",
   TypingStopped: "TypingStopped",
   ParticipantLeft: "ParticipantLeft",
-  UpdateData: "updateData",
+  UpdateData: "updateData"
 });
 
 export const agentEvents = Object.freeze({
-  "#ENABLE#AUTH#BUTTON#": "#ENABLE#AUTH#BUTTON#",
+  "#ENABLE#AUTH#BUTTON#": "#ENABLE#AUTH#BUTTON#"
 });
 
 export const UserTypes = Object.freeze({
   External: "External",
   Agent: "Agent",
-  Client: "Client",
+  Client: "Client"
 });
 
 export class GenesysChat {
   static chatInstance;
+   
   static getInstance() {
     if (GenesysChat.chatInstance === undefined) {
+       
       GenesysChat.chatInstance = new GenesysChat();
     }
     return GenesysChat.chatInstance;
@@ -57,7 +53,7 @@ export class GenesysChat {
     this.messagesCallback = () => {};
     this.connectedCallback = () => {};
     this.failureCallback = () => {};
-    this.application = "";
+    this.application = '';
   }
 
   get userData() {
@@ -69,11 +65,11 @@ export class GenesysChat {
       EmailAddress,
       isAuth = false,
       message,
-      CIF,
-      sessionID,
+       
+      sessionID
     } = this.userInfo;
 
-    if (this.application === "Internet Banking") {
+    if (this.application === 'Internet Banking') {
       return {
         key1: "v1",
         key2: "v2",
@@ -92,7 +88,7 @@ export class GenesysChat {
         OsType: "iOS",
         // CIF,
         sessionID,
-        FinalAuthenticationDateTime: new Date(),
+        FinalAuthenticationDateTime: new Date()
       };
     } else {
       return {
@@ -111,8 +107,8 @@ export class GenesysChat {
         IsAuth: isAuth ? "Y" : "N",
         ChannelID: this.config.channelId,
         OsType: "iOS",
-        CIF,
-        FinalAuthenticationDateTime: new Date(),
+        
+        FinalAuthenticationDateTime: new Date()
       };
     }
   }
@@ -123,7 +119,7 @@ export class GenesysChat {
     this.config = config;
     this.cometD.configure({
       url: this.config.apiPath,
-      logLevel: "debug",
+      logLevel: "debug"
     });
     const TimeStampExtension = require("cometd/TimeStampExtension");
     this.cometD.registerExtension("timestamp", new TimeStampExtension());
@@ -138,6 +134,7 @@ export class GenesysChat {
    */
   initChat = (userInfo, callback = () => {}, failureCallback = () => {}) => {
     // Handshake with the server.
+     
     if (this.cometD.getStatus() !== CONNECTED_STATUS) {
       this.userInfo = userInfo;
       this.connectedCallback = callback;
@@ -149,9 +146,10 @@ export class GenesysChat {
   };
 
   initiateHandshake = () => {
+  
     return new Promise(
       (resolve, reject) =>
-        (this.handshake = this.cometD.handshake((h) => {
+        (this.handshake = this.cometD.handshake(h => {
           if (h.successful) {
             this.subscribeToChannel();
             resolve(h);
@@ -163,20 +161,23 @@ export class GenesysChat {
   };
 
   subscribeToChannel = () => {
+     
     return new Promise((resolve, reject) => {
       this.subsctiption = this.cometD.subscribe(
         this.config.channel,
-        (messages) => {
+        messages => {
+          console.log(messages)
           if (messages.data.secureKey !== undefined) {
             this.secureKey = messages.data.secureKey;
           }
           if (has(messages, "errors")) {
-            this.failureCallback("error");
+            this.failureCallback('error');
             reject(messages.errors);
           } else if (has(messages, "data.errors")) {
-            this.failureCallback("error");
+            this.failureCallback('error');
             reject(messages.data.errors);
-          } else {
+          }
+          else {
             this.onReceiveData(messages);
             resolve(messages);
           }
@@ -186,55 +187,49 @@ export class GenesysChat {
     });
   };
 
-  updateUserData = (userData) => {
+  updateUserData = userData => {
     this.userInfo = userData;
     const updateChangeData = {
       operation: ChatOperationTypes.UpdateData,
       userData: this.userData,
-      secureKey: this.secureKey,
+      secureKey: this.secureKey
     };
 
     return new Promise((resolve, reject) => {
-      this.cometD.publish(
-        this.config.channel,
-        updateChangeData,
-        (publishResponse) => {
-          if (publishResponse.successful) {
-            resolve(publishResponse);
-          } else {
-            reject(publishResponse);
-          }
+      this.cometD.publish(this.config.channel, updateChangeData, publishResponse => {
+        if (publishResponse.successful) {
+          resolve(publishResponse);
+        } else {
+          reject(publishResponse);
         }
-      );
+      });
     });
   };
 
-  sendChatRequest = (subscribeReply) => {
+  sendChatRequest = subscribeReply => {
+     
     const requestChatData = {
       operation: ChatOperationTypes.RequestChat,
-      firstName: "Farhan",
-      // lastName: this.userInfo.AuthenticatedCustomerName || this.userInfo.InitiatedCustomerName,
-      lastName: "Khan",
+      firstName: "mustafa",
+      lastName: 'zaki',
       subject: this.userInfo.selectedSubject,
       userData: this.userData,
       auth: {
-        [arg1.join("")]: data1,
-        [arg2.join("")]: data1,
-      },
+        [arg1.join('')]: data1,
+        [arg2.join('')]: data1,
+      }
     };
+     
     return new Promise((resolve, reject) => {
       if (subscribeReply.successful)
-        this.cometD.publish(
-          this.config.channel,
-          requestChatData,
-          (response) => {
-            if (response.successful) {
-              resolve(response);
-            } else {
-              reject(response);
-            }
+        this.cometD.publish(this.config.channel, requestChatData, response => {
+          if (response.successful) {
+            resolve(response);
+            this.sendChatMessage('testing chat')
+          } else {
+            reject(response);
           }
-        );
+        });
       else reject({ message: "Subscribe is unsuccessful" });
     });
   };
@@ -246,7 +241,7 @@ export class GenesysChat {
     }
   };
 
-  onSubscribeStatus = (subscribeReply) => {
+  onSubscribeStatus = subscribeReply => {
     if (subscribeReply.successful) {
       this.sendChatRequest();
     }
@@ -255,7 +250,7 @@ export class GenesysChat {
   addMessage = ({ text: message, utcTime: messageUtcTime, index, from }) => {
     const utcTime = new Date(messageUtcTime).toLocaleTimeString([], {
       hour: "2-digit",
-      minute: "2-digit",
+      minute: "2-digit"
     });
     const name = from.nickname && from.nickname.replace(/^\s*/, "");
 
@@ -264,13 +259,13 @@ export class GenesysChat {
       utcTime,
       type: from.type,
       id: nanoid(),
-      name,
+      name
     };
     this.chatMessages.push(messageObject);
     this.messagesCallback([...this.chatMessages]);
   };
 
-  errorHandler = (receivedData) => {
+  errorHandler = receivedData => {
     return new Promise((resolve, reject) => {
       if (has(receivedData, "errors")) {
         reject(receivedData.errors);
@@ -282,23 +277,17 @@ export class GenesysChat {
 
   onReceiveData = (message, callBack = () => {}) => {
     const dataFromServer = message.data;
-    this.lastPosition = dataFromServer.nextPosition;
+   this.lastPosition = dataFromServer.nextPosition;
     if (has(dataFromServer, "messages")) {
-      dataFromServer.messages.forEach((message) => {
-        if (
-          has(agentEvents, message.text) &&
-          message.from.type === UserTypes.Agent
-        ) {
+      dataFromServer.messages.forEach(message => {
+        if (has(agentEvents, message.text) && message.from.type === UserTypes.Agent) {
           this.eventsCallback(message.text);
         } else {
           switch (message.type) {
             case ChatOperationTypes.IncomingMessage: {
-              if (
-                message.text.includes(INVALID_SESSION) &&
-                message.from.type !== UserTypes.Client
-              ) {
+              if (message.text.includes(INVALID_SESSION) && message.from.type !== UserTypes.Client) {
                 GenesysChat.getInstance().triggerDisconnectEvent();
-                this.failureCallback(INVALID_SESSION);
+                this.failureCallback(INVALID_SESSION)
                 break;
               }
 
@@ -309,20 +298,20 @@ export class GenesysChat {
               if (message.from.type === UserTypes.Agent) {
                 this.addMessage({
                   ...message,
-                  text: "Agent " + message.from.nickname + " joined the chat",
+                  text: "Agent " + message.from.nickname + " joined the chat"
                 });
               }
               if (message.from.type === UserTypes.Client) {
                 this.addMessage({
                   ...message,
                   from: { type: UserTypes.External },
-                  text: message.from.nickname + " has joined the Chat",
+                  text: message.from.nickname + " has joined the Chat"
                 });
                 this.addMessage({
                   ...message,
                   from: { type: UserTypes.External },
                   index: 0,
-                  text: "Welcome to RAKBANK live chat!",
+                  text: "Welcome to RAKBANK live chat!"
                 });
                 this.connectedCallback();
               }
@@ -332,7 +321,8 @@ export class GenesysChat {
             case ChatOperationTypes.ParticipantLeft: {
               if (message.from.type === UserTypes.Agent) {
                 const updatedMessage = {
-                  text: "The chat agent left the room. Thank you for chatting with Rakbank.\nHave a nice day!",
+                  text:
+                    "The chat agent left the room. Thank you for chatting with Rakbank.\nHave a nice day!"
                 };
 
                 this.addMessage({ ...message, ...updatedMessage });
@@ -343,9 +333,7 @@ export class GenesysChat {
             case ChatOperationTypes.TypingStarted:
             case ChatOperationTypes.TypingStopped: {
               if (message.from.type === UserTypes.Agent) {
-                this.onTypingEvents(
-                  message.type === ChatOperationTypes.TypingStarted
-                );
+                this.onTypingEvents(message.type === ChatOperationTypes.TypingStarted);
               }
               break;
             }
@@ -369,24 +357,21 @@ export class GenesysChat {
    * @param message - message to send
    */
 
-  sendChatMessage = (message) => {
+  sendChatMessage = message => {
+     
     return new Promise((resolve, reject) => {
       const sendMessageData = {
         operation: ChatOperationTypes.SendMessage,
         message,
-        secureKey: this.secureKey,
+        secureKey: this.secureKey
       };
-      this.cometD.publish(
-        this.config.channel,
-        sendMessageData,
-        (publishResponse) => {
-          if (publishResponse.successful) {
-            resolve(publishResponse);
-          } else {
-            reject();
-          }
+      this.cometD.publish(this.config.channel, sendMessageData, publishResponse => {
+        if (publishResponse.successful) {
+          resolve(publishResponse);
+        } else {
+          reject();
         }
-      );
+      });
     });
   };
 
@@ -394,7 +379,7 @@ export class GenesysChat {
     const sendMessageData = {
       operation: ChatOperationTypes.ClientStartTyping,
       message: userName + " started typing",
-      secureKey: this.secureKey,
+      secureKey: this.secureKey
     };
     this.cometD.publish(this.config.channel, sendMessageData);
   };
@@ -403,7 +388,7 @@ export class GenesysChat {
     const sendMessageData = {
       operation: ChatOperationTypes.ClientStopTyping,
       message: userName + " stoped typing",
-      secureKey: this.secureKey,
+      secureKey: this.secureKey
     };
     this.cometD.publish(this.config.channel, sendMessageData);
   };
@@ -417,7 +402,7 @@ export class GenesysChat {
     if (this.cometD.getStatus() === CONNECTED_STATUS) {
       const disconnectData = {
         operation: ChatOperationTypes.ChatDisconnect,
-        secureKey: this.secureKey,
+        secureKey: this.secureKey
       };
       this.cometD.publish(this.config.channel, disconnectData);
       this.unSubscribe();
@@ -431,25 +416,25 @@ export class GenesysChat {
     const requestNotificationData = {
       operation: ChatOperationTypes.SyncNotifications,
       secureKey: this.secureKey,
-      transcriptPosition: parseInt(this.lastPosition),
+      transcriptPosition: parseInt(this.lastPosition)
     };
     this.cometD.publish(this.config.channel, requestNotificationData);
   };
 
-  updateNickName = (nickName) => {
+  updateNickName = nickName => {
     const updateNicknameData = {
       operation: ChatOperationTypes.UpdateNickName,
       nickname: nickName,
-      secureKey: this.secureKey,
+      secureKey: this.secureKey
     };
     this.cometD.publish(this.config.channel, updateNicknameData);
   };
 
-  setOnTypingEventsHandler = (handler) => {
+  setOnTypingEventsHandler = handler => {
     this.onTypingEvents = handler;
   };
 
-  setOnAgentLeftEventHandler = (handler) => {
+  setOnAgentLeftEventHandler = handler => {
     this.agentLeftEvent = handler;
   };
 }
